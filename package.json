@@ -1,0 +1,36 @@
+{
+  "name": "ankisync",
+  "version": "1.0.0",
+  "description": "Do in Anki what Anki cannot do",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "npm run tsc",
+    "test": "ts-mocha tests/**/*.spec.ts",
+    "tsc": "tsc -p tsconfig.lib.json"
+  },
+  "keywords": [
+    "anki",
+    "ankisync"
+  ],
+  "author": "Pacharapol Withayasakpunt",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patarapolw/ankisync.js.git"
+  },
+  "dependencies": {
+    "@types/adm-zip": "^0.4.32",
+    "@types/bluebird-global": "^3.5.12",
+    "@types/fs-extra": "^8.0.0",
+    "@types/node": "^12.7.2",
+    "@types/rimraf": "^2.0.2",
+    "@types/spark-md5": "^3.0.1",
+    "adm-zip": "^0.4.13",
+    "bluebird": "^3.5.5",
+    "fs-extra": "^8.1.0",
+    "rimraf": "^3.0.0",
+    "spark-md5": "^3.0.0",
+    "sqlite": "^3.0.3"
+  }
+}

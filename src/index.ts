@@ -352,7 +352,7 @@ export class Apkg {
 export default class Anki {
     public static async connect(filePath: string) {
         const p = path.parse(filePath);
-        const dir = path.join(p.dir, p.name);
+        const dir = path.join(p.dir, p.name === p.base ? p.name + "_" : p.name);
         fs.ensureDirSync(dir);
 
         const zip = new AdmZip(filePath);

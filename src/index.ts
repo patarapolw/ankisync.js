@@ -28,7 +28,7 @@ export interface ITemplate {
 export interface IMedia {
     h: string;
     name: string;
-    data: Buffer;
+    data: ArrayBuffer;
 }
 
 export interface INote {

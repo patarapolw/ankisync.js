@@ -1,9 +1,9 @@
 # ankisync.js
 
-Do in Anki what Anki cannot do in JavaScript (Node.js)
+Do in Anki what Anki cannot do in JavaScript/TypeScript (Node.js)
 
 ## Example
 
-This is used in <https://github.com/patarapolw/rep2recall-r2r>.
+This is used in <https://github.com/patarapolw/r2r-sqlite>.
 
-Please see <https://github.com/patarapolw/rep2recall-r2r/tree/master/scripts>
+Please see <https://github.com/patarapolw/r2r-sqlite/tree/master/src/index.ts>

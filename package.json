@@ -1,13 +1,17 @@
 {
   "name": "ankisync",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Do in Anki what Anki cannot do",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib",
+    "src"
+  ],
   "scripts": {
-    "prepublishOnly": "npm run build",
+    "prepack": "yarn build",
     "test": "ts-mocha tests/**/*.spec.ts",
-    "build": "tsc -p tsconfig.lib.json"
+    "build": "tsc -p src/tsconfig.json"
   },
   "keywords": [
     "anki",
@@ -20,16 +24,25 @@
     "url": "https://github.com/patarapolw/ankisync.js.git"
   },
   "dependencies": {
-    "@types/adm-zip": "^0.4.32",
-    "@types/bluebird-global": "^3.5.12",
-    "@types/fs-extra": "^8.0.0",
-    "@types/rimraf": "^2.0.2",
-    "@types/spark-md5": "^3.0.1",
     "adm-zip": "^0.4.13",
-    "bluebird": "^3.5.5",
     "fs-extra": "^8.1.0",
     "rimraf": "^3.0.0",
     "spark-md5": "^3.0.0",
     "sqlite": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.4.32",
+    "@types/fs-extra": "^8.0.0",
+    "@types/rimraf": "^2.0.2",
+    "@types/spark-md5": "^3.0.1",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
+    "eslint": ">=6.2.2",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": ">=2.18.0",
+    "eslint-plugin-node": ">=9.1.0",
+    "eslint-plugin-promise": ">=4.2.1",
+    "eslint-plugin-standard": ">=4.0.0",
+    "typescript": "^3.7.5"
   }
 }

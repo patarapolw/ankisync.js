@@ -1,12 +1,11 @@
-import fs from "fs-extra";
-import AdmZip from "adm-zip";
-import path from "path";
-import SparkMD5 from "spark-md5";
-import sqlite from "sqlite";
-import Bluebird from "bluebird";
-import rimraf from "rimraf";
+import fs from 'fs-extra'
+import AdmZip from 'adm-zip'
+import path from 'path'
+import SparkMD5 from 'spark-md5'
+import sqlite from 'sqlite'
+import rimraf from 'rimraf'
 
-global.Promise = Bluebird;
+const sql = (s: TemplateStringsArray, ...args: any[]) => s.map((ss, i) => `${ss}${args[i] || ''}`).join('')
 
 export interface IDeck {
     name: string;
@@ -44,12 +43,12 @@ export interface ICard {
 }
 
 export class Apkg {
-    public static async connect(colPath: string) {
-        const db = await sqlite.open(colPath);
-        const tables = await db.all("SELECT name FROM sqlite_master WHERE type='table'");
+  public static async connect (colPath: string) {
+    const db = await sqlite.open(colPath)
+    const tables = await db.all("SELECT name FROM sqlite_master WHERE type='table'")
 
-        if (!tables.some((t) => t.name === "col")) {
-            await db.run(`
+    if (!tables.some((t) => t.name === 'col')) {
+      await db.run(sql`
             -- col contains a single row that holds various information about the collection
             CREATE TABLE col (
                 id              integer primary key default 1,
@@ -80,9 +79,9 @@ export class Apkg {
                 -- json array of json objects containing the deck options
                 tags            text not null default '{}'
                 -- a cache of tags used in the collection (This list is displayed in the browser. Potentially at other place)
-            );`);
+            );`)
 
-            await db.run(`
+      await db.run(sql`
             -- Notes contain the raw information that is formatted into a number of cards
             -- according to the models
             CREATE TABLE notes (
@@ -112,12 +111,12 @@ export class Apkg {
                 -- unused
                 data            text not null default ''
                 -- unused
-            );`);
+            );`)
 
-            await db.run("CREATE INDEX ix_notes_usn on notes (usn)");
-            await db.run("CREATE INDEX ix_notes_csum on notes (csum)");
+      await db.run(sql`CREATE INDEX ix_notes_usn on notes (usn)`)
+      await db.run(sql`CREATE INDEX ix_notes_csum on notes (csum)`)
 
-            await db.run(`
+      await db.run(sql`
             -- Cards are what you review.
             -- There can be multiple cards for each note, as determined by the Template.
             CREATE TABLE cards (
@@ -170,13 +169,13 @@ export class Apkg {
                 -- currently unused
                 data            text not null default ''
                 -- currently unused
-            );`);
+            );`)
 
-            await db.run("CREATE INDEX ix_cards_usn on cards (usn)");
-            await db.run("CREATE INDEX ix_cards_nid on cards (nid)");
-            await db.run("CREATE INDEX ix_cards_sched on cards (did, queue, due)");
+      await db.run(sql`CREATE INDEX ix_cards_usn on cards (usn)`)
+      await db.run(sql`CREATE INDEX ix_cards_nid on cards (nid)`)
+      await db.run(sql`CREATE INDEX ix_cards_sched on cards (did, queue, due)`)
 
-            await db.run(`
+      await db.run(sql`
             -- revlog is a review history; it has a row for every review you've ever done!
             CREATE TABLE revlog (
                 id              integer primary key,
@@ -200,12 +199,12 @@ export class Apkg {
                 -- how many milliseconds your review took, up to 60000 (60s)
                 type            integer not null
                 --  0=learn, 1=review, 2=relearn, 3=cram
-            );`);
+            );`)
 
-            await db.run("CREATE INDEX ix_revlog_usn on revlog (usn)");
-            await db.run("CREATE INDEX ix_revlog_cid on revlog (cid)");
+      await db.run(sql`CREATE INDEX ix_revlog_usn on revlog (usn)`)
+      await db.run(sql`CREATE INDEX ix_revlog_cid on revlog (cid)`)
 
-            await db.run(`
+      await db.run(sql`
             -- Contains deleted cards, notes, and decks that need to be synced.
             -- usn should be set to -1,
             -- oid is the original id.
@@ -214,25 +213,25 @@ export class Apkg {
                 usn             integer not null default -1,
                 oid             integer not null,
                 type            integer not null
-            );`);
-        }
+            );`)
+    }
 
-        if (!tables.some((t) => t.name === "deck")) {
-            await db.run(`
+    if (!tables.some((t) => t.name === 'deck')) {
+      await db.run(sql`
             CREATE TABLE decks (
                 id      INTEGER PRIMARY KEY,
                 name    VARCHAR NOT NULL
-            )`);
+            )`)
 
-            await db.run(`
+      await db.run(sql`
             CREATE TABLE models (
                 id      INTEGER PRIMARY KEY,
                 name    VARCHAR NOT NULL,
                 flds    VARCHAR NOT NULL,
                 css     VARCHAR
-            )`);
-    
-            await db.run(`
+            )`)
+
+      await db.run(sql`
             CREATE TABLE templates (
                 id      INTEGER PRIMARY KEY AUTOINCREMENT,
                 mid     INTEGER NOT NULL REFERENCES model(id),
@@ -240,162 +239,162 @@ export class Apkg {
                 name    VARCHAR NOT NULL,
                 qfmt    VARCHAR NOT NULL,
                 afmt    VARCHAR
-            )`);
+            )`)
 
-            await db.run(`
+      await db.run(sql`
             CREATE TABLE media (
                 h       VARCHAR PRIMARY KEY,
                 name    VARCHAR NOT NULL,
                 data    BLOB NOT NULL
             )`)
 
-            const { decks, models } = await db.get("SELECT decks, models FROM col");
-    
-            await Promise.all(Object.values(JSON.parse(decks)).map((d: any) => {
-                return db.run("INSERT INTO decks (id, name) VALUES (?, ?)", parseInt(d.id), d.name)
-            }));
-    
-            await Promise.all(Object.values(JSON.parse(models)).map(async (model: any) => {
-                await db.run("INSERT INTO models (id, name, flds, css) VALUES (?, ?, ?, ?)",
-                parseInt(model.id), model.name, model.flds.map((f: any) => f.name).join("\x1f"), model.css)
-    
-                return await Promise.all(model.tmpls.map((t: any, i: number) => {
-                    return db.run("INSERT INTO templates (mid, ord, name, qfmt, afmt) VALUES (?, ?, ?, ?, ?)",
-                    parseInt(model.id), i, t.name, t.qfmt, t.afmt);
-                }));
-            }));
-        }
+      const { decks, models } = await db.get(sql`SELECT decks, models FROM col`)
 
-        return new Apkg({colPath, db});
+      await Promise.all(Object.values(JSON.parse(decks)).map((d: any) => {
+        return db.run(sql`INSERT INTO decks (id, "name") VALUES (?, ?)`, parseInt(d.id), d.name)
+      }))
+
+      await Promise.all(Object.values(JSON.parse(models)).map(async (model: any) => {
+        await db.run(sql`INSERT INTO models (id, "name", flds, css) VALUES (?, ?, ?, ?)`,
+          parseInt(model.id), model.name, model.flds.map((f: any) => f.name).join('\x1f'), model.css)
+
+        return await Promise.all(model.tmpls.map((t: any, i: number) => {
+          return db.run(sql`INSERT INTO templates (mid, ord, "name", qfmt, afmt) VALUES (?, ?, ?, ?, ?)`,
+            parseInt(model.id), i, t.name, t.qfmt, t.afmt)
+        }))
+      }))
     }
+
+    return new Apkg({ colPath, db })
+  }
 
     public db!: sqlite.Database;
     public colPath!: string;
 
-    private constructor(params: any) {
-        for (const [k, v] of Object.entries(params)) {
-            (this as any)[k] = v;
-        }
+    private constructor (params: any) {
+      for (const [k, v] of Object.entries(params)) {
+        (this as any)[k] = v
+      }
     }
 
-    public async close() {
-        await this.db.close();
+    public async close () {
+      await this.db.close()
     }
 
     public tables = {
-        decks: {
-            all: async (): Promise<IDeck[]> => {
-                return await this.db.all(`SELECT name FROM decks`);
-            },
-            get: async (id: number): Promise<IDeck> => {
-                return await this.db.get(`SELECT name FROM decks WHERE id = ?`, id);
-            }
+      decks: {
+        all: async (): Promise<IDeck[]> => {
+          return await this.db.all(sql`SELECT "name" FROM decks`)
         },
-        models: {
-            get: async (id: number): Promise<IModel> => {
-                const el = await this.db.get(`SELECT name, flds, css FROM models WHERE id = ?`, id);
-                el.flds = el.flds.split("\x1f");
-                return el;
-            } 
-        },
-        templates: {
-            get: async (mid: number, ord: number): Promise<ITemplate> => {
-                const el = await this.db.get(`
-                SELECT name, qfmt, afmt FROM templates
-                WHERE mid = ? AND ord = ?`, mid, ord);
-                el.model = await this.tables.models.get(mid);
-
-                return el;
-            }
-        },
-        media: {
-            all: async (): Promise<IMedia[]> => {
-                return await this.db.all(`SELECT h, name, data FROM media`);
-            }
-        },
-        col: {},
-        notes: {
-            get: async (id: number): Promise<INote> => {
-                const el = await this.db.get(`SELECT mid, tags, flds FROM notes WHERE id = ?`, id);
-                
-                el.model = await this.tables.models.get(el.mid);
-                // delete el.mid;
-                
-                el.tags = el.tags.split(" ");
-                el.flds = el.flds.split("\x1f");
-
-                return el;
-            }
-        },
-        cards: {
-            all: async (): Promise<ICard[]> => {
-                return await Promise.all((await this.db.all(`SELECT nid, did, ord FROM cards`)).map(async (el) => {
-                    el.note = await this.tables.notes.get(el.nid);
-                    delete el.nid;
-
-                    el.deck = await this.tables.decks.get(el.did);
-                    delete el.did;
-
-                    el.template = await this.tables.templates.get(el.note.mid, el.ord);
-                    delete el.note.mid;
-                    delete el.ord;
-
-                    // delete el.note.model;
-
-                    return el;
-                }))
-            }
+        get: async (id: number): Promise<IDeck> => {
+          return await this.db.get(sql`SELECT "name" FROM decks WHERE id = ?`, id)
         }
+      },
+      models: {
+        get: async (id: number): Promise<IModel> => {
+          const el = await this.db.get(sql`SELECT "name", flds, css FROM models WHERE id = ?`, id)
+          el.flds = el.flds.split('\x1f')
+          return el
+        }
+      },
+      templates: {
+        get: async (mid: number, ord: number): Promise<ITemplate> => {
+          const el = await this.db.get(sql`
+                SELECT "name", qfmt, afmt FROM templates
+                WHERE mid = ? AND ord = ?`, mid, ord)
+          el.model = await this.tables.models.get(mid)
+
+          return el
+        }
+      },
+      media: {
+        all: async (): Promise<IMedia[]> => {
+          return await this.db.all(sql`SELECT h, "name", "data" FROM media`)
+        }
+      },
+      col: {},
+      notes: {
+        get: async (id: number): Promise<INote> => {
+          const el = await this.db.get(sql`SELECT mid, tags, flds FROM notes WHERE id = ?`, id)
+
+          el.model = await this.tables.models.get(el.mid)
+          // delete el.mid;
+
+          el.tags = el.tags.split(' ')
+          el.flds = el.flds.split('\x1f')
+
+          return el
+        }
+      },
+      cards: {
+        all: async (): Promise<ICard[]> => {
+          return await Promise.all((await this.db.all(sql`SELECT nid, did, ord FROM cards`)).map(async (el) => {
+            el.note = await this.tables.notes.get(el.nid)
+            delete el.nid
+
+            el.deck = await this.tables.decks.get(el.did)
+            delete el.did
+
+            el.template = await this.tables.templates.get(el.note.mid, el.ord)
+            delete el.note.mid
+            delete el.ord
+
+            // delete el.note.model;
+
+            return el
+          }))
+        }
+      }
     }
 }
 
 export default class Anki {
-    public static async connect(filePath: string) {
-        const p = path.parse(filePath);
-        const dir = path.join(p.dir, p.name === p.base ? p.name + "_" : p.name);
-        fs.ensureDirSync(dir);
+  public static async connect (filePath: string) {
+    const p = path.parse(filePath)
+    const dir = path.join(p.dir, p.name === p.base ? p.name + '_' : p.name)
+    fs.ensureDirSync(dir)
 
-        const zip = new AdmZip(filePath);
-        // const zipCount = zip.getEntries().length;
+    const zip = new AdmZip(filePath)
+    // const zipCount = zip.getEntries().length;
 
-        zip.extractAllTo(dir);
+    zip.extractAllTo(dir)
 
-        const apkg = await Apkg.connect(path.join(dir, "collection.anki2"));
+    const apkg = await Apkg.connect(path.join(dir, 'collection.anki2'))
 
-        const mediaJson = JSON.parse(fs.readFileSync(path.join(dir, "media"), "utf8"));
-        const total = Object.keys(mediaJson).length;
+    const mediaJson = JSON.parse(fs.readFileSync(path.join(dir, 'media'), 'utf8'))
+    // const total = Object.keys(mediaJson).length
 
-        await Promise.all(Object.keys(mediaJson).map((k, i) => {
-            const data = fs.readFileSync(path.join(dir, k));
-            const h = SparkMD5.ArrayBuffer.hash(data);
-            const media = {
-                name: mediaJson[k],
-                data,
-                h
-            };
+    await Promise.all(Object.keys(mediaJson).map((k, i) => {
+      const data = fs.readFileSync(path.join(dir, k))
+      const h = SparkMD5.ArrayBuffer.hash(data)
+      const media = {
+        name: mediaJson[k],
+        data,
+        h
+      }
 
-            return apkg.db.run(`
-            INSERT INTO media (h, name, data)
+      return apkg.db.run(sql`
+            INSERT INTO media (h, "name", "data")
             VALUES (?, ?, ?)
             ON CONFLICT IGNORE`,
-            media.h, media.name, media.data);
-        }));
+      media.h, media.name, media.data)
+    }))
 
-        return new Anki({filePath, apkg, dir});
-    }
+    return new Anki({ filePath, apkg, dir })
+  }
 
     public filePath!: string;
     public dir!: string;
     public apkg!: Apkg;
 
-    private constructor(params: any) {
-        for (const [k, v] of Object.entries(params)) {
-            (this as any)[k] = v;
-        }
+    private constructor (params: any) {
+      for (const [k, v] of Object.entries(params)) {
+        (this as any)[k] = v
+      }
     }
 
-    public async close() {
-        await this.apkg.close();
-        rimraf.sync(this.dir)
+    public async close () {
+      await this.apkg.close()
+      rimraf.sync(this.dir)
     }
 }

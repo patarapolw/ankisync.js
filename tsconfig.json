@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "module": "commonjs",
-    "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
@@ -14,25 +13,6 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "declaration": true,
-    "declarationMap": true,
-    "lib": ["es2015", "es7", "es6", "dom", "es2017"],
-    "baseUrl": ".",
-    "types": [
-      "node",
-      "bluebird-global"
-    ],
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
-  },
-  "include": [
-    "src/**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+    "declarationMap": true
+  }
 }

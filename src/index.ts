@@ -42,10 +42,10 @@ export interface ICard {
     template: ITemplate;
 }
 
-export class Apkg {
+export class Anki2 {
   public static async connect (colPath: string) {
     const db = await sqlite.open(colPath)
-    const tables = await db.all("SELECT name FROM sqlite_master WHERE type='table'")
+    const tables = await db.all(sql`SELECT name FROM sqlite_master WHERE type='table'`)
 
     if (!tables.some((t) => t.name === 'col')) {
       await db.run(sql`
@@ -265,7 +265,7 @@ export class Apkg {
       }))
     }
 
-    return new Apkg({ colPath, db })
+    return new Anki2({ colPath, db })
   }
 
     public db!: sqlite.Database;
@@ -348,7 +348,7 @@ export class Apkg {
     }
 }
 
-export default class Anki {
+export class Apkg {
   public static async connect (filePath: string) {
     const p = path.parse(filePath)
     const dir = path.join(p.dir, p.name === p.base ? p.name + '_' : p.name)
@@ -359,7 +359,7 @@ export default class Anki {
 
     zip.extractAllTo(dir)
 
-    const apkg = await Apkg.connect(path.join(dir, 'collection.anki2'))
+    const anki2 = await Anki2.connect(path.join(dir, 'collection.anki2'))
 
     const mediaJson = JSON.parse(fs.readFileSync(path.join(dir, 'media'), 'utf8'))
     // const total = Object.keys(mediaJson).length
@@ -373,19 +373,19 @@ export default class Anki {
         h
       }
 
-      return apkg.db.run(sql`
+      return anki2.db.run(sql`
             INSERT INTO media (h, "name", "data")
             VALUES (?, ?, ?)
-            ON CONFLICT IGNORE`,
+            ON CONFLICT DO NOTHING`,
       media.h, media.name, media.data)
     }))
 
-    return new Anki({ filePath, apkg, dir })
+    return new Apkg({ filePath, anki2, dir })
   }
 
     public filePath!: string;
     public dir!: string;
-    public apkg!: Apkg;
+    public anki2!: Anki2;
 
     private constructor (params: any) {
       for (const [k, v] of Object.entries(params)) {
@@ -394,7 +394,7 @@ export default class Anki {
     }
 
     public async close () {
-      await this.apkg.close()
+      await this.anki2.close()
       rimraf.sync(this.dir)
     }
 }

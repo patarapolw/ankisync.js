@@ -1,19 +1,19 @@
 import { Entity, primary, prop, Table, Db } from 'liteorm'
 
 @Entity({ name: 'decks' })
-class DbDecks {
+class AnkiDecks {
   @primary({ autoincrement: true }) id?: number
   @prop() name!: string
 }
 
-export const dbDecks = new Table(DbDecks) as Table<DbDecks> & {
+export const ankiDecks = new Table(AnkiDecks) as Table<AnkiDecks> & {
   toJSON(db: Db, id: number): Promise<Record<string, any> | null>
 }
 
-dbDecks.toJSON = async (db, id) => {
-  const r = await db.find(dbDecks)({ id }, {
-    id: dbDecks.c.id,
-    name: dbDecks.c.name
+ankiDecks.toJSON = async (db, id) => {
+  const r = await db.find(ankiDecks)({ id }, {
+    id: ankiDecks.c.id,
+    name: ankiDecks.c.name
   }, { limit: 1 })
 
   if (!r[0]) {

@@ -2,7 +2,7 @@ import { prop, Entity, Table, primary } from 'liteorm'
 import SparkMD5 from 'spark-md5'
 
 @Entity({ name: 'media' })
-class DbMedia {
+class AnkiMedia {
   @primary({ autoincrement: true }) id?: number
 
   @prop({
@@ -14,4 +14,4 @@ class DbMedia {
   @prop() data!: ArrayBuffer
 }
 
-export const dbMedia = new Table(DbMedia)
+export const ankiMedia = new Table(AnkiMedia)

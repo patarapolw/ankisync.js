@@ -4,7 +4,7 @@ import { primary, prop, Entity, Table } from 'liteorm'
  * col contains a single row that holds various information about the collection
  */
 @Entity({ name: 'col' })
-class DbCol {
+class AnkiCol {
   /**
    * arbitrary number since there is only one row
    */
@@ -148,4 +148,4 @@ class DbCol {
   @prop({ default: () => ({}) }) tags?: Record<string, any>
 }
 
-export const dbCol = new Table(DbCol)
+export const ankiCol = new Table(AnkiCol)

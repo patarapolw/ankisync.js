@@ -1,7 +1,7 @@
 import { Entity, primary, prop, Table } from 'liteorm'
 
-import { dbNotes } from './Notes'
-import { dbDecks } from '../additional/Decks'
+import { ankiNotes } from './Notes'
+import { ankiDecks } from '../additional/Decks'
 
 @Entity({
   name: 'cards',
@@ -10,7 +10,7 @@ import { dbDecks } from '../additional/Decks'
     keys: ['deck', 'queue', 'due']
   }]
 })
-class DbCards {
+class AnkiCards {
   /**
    * the epoch milliseconds of when the card was created
    *
@@ -22,13 +22,13 @@ class DbCards {
    *
    * Also milliseconds
    */
-  @prop({ references: dbNotes, index: 'ix_cards_nid' }) nid!: number
+  @prop({ references: ankiNotes, index: 'ix_cards_nid' }) nid!: number
   /**
    * deck id (available in col table)
    *
    * @default 1
    */
-  @prop({ references: dbDecks, default: 1 }) did!: number
+  @prop({ references: ankiDecks, default: 1 }) did!: number
   /**
    * ```
    * Ordinal : identifies which of the card templates or cloze deletions it corresponds to
@@ -124,4 +124,4 @@ class DbCards {
   @prop({ default: '' }) data?: string
 }
 
-export const dbCards = new Table(DbCards)
+export const ankiCards = new Table(AnkiCards)

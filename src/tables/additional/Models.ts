@@ -1,8 +1,8 @@
 import { primary, Entity, prop, Table, Db } from 'liteorm'
-import { dbTemplates } from './Templates'
+import { ankiTemplates } from './Templates'
 
 @Entity({ name: 'models' })
-class DbModels {
+class AnkiModels {
   @primary({ autoincrement: true }) id?: number
   @prop() name!: string
 
@@ -20,7 +20,7 @@ class DbModels {
   @prop({ null: true }) css?: string
 }
 
-export const dbModels = new Table(DbModels) as Table<DbModels> & {
+export const ankiModels = new Table(AnkiModels) as Table<AnkiModels> & {
   toJSON(db: Db, id: number): Promise<Record<string, any> | null>
 }
 
@@ -74,24 +74,24 @@ export const dbModels = new Table(DbModels) as Table<DbModels> & {
  * }
  * ```
  */
-dbModels.toJSON = async (db, id) => {
-  const r = await db.find(dbModels)({ id }, {
-    id: dbModels.c.id,
-    css: dbModels.c.css,
-    flds: dbModels.c.flds,
-    name: dbModels.c.name
+ankiModels.toJSON = async (db, id) => {
+  const r = await db.find(ankiModels)({ id }, {
+    id: ankiModels.c.id,
+    css: ankiModels.c.css,
+    flds: ankiModels.c.flds,
+    name: ankiModels.c.name
   }, { limit: 1 })
 
   if (!r[0]) {
     return null
   }
 
-  const tmpls = await db.find(dbTemplates)({ mid: id }, {
-    mid: dbTemplates.c.mid,
-    afmt: dbTemplates.c.afmt,
-    qfmt: dbTemplates.c.qfmt
+  const tmpls = await db.find(ankiTemplates)({ mid: id }, {
+    mid: ankiTemplates.c.mid,
+    afmt: ankiTemplates.c.afmt,
+    qfmt: ankiTemplates.c.qfmt
   }, {
-    sort: { key: dbTemplates.c.ord }
+    sort: { key: ankiTemplates.c.ord }
   })
 
   return {

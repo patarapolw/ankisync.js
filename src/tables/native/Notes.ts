@@ -4,14 +4,14 @@ import { primary, Entity, prop, Table } from 'liteorm'
 import shortid from 'shortid'
 import htmlToText from 'html-to-text'
 
-import { dbModels } from '../additional/Models'
+import { ankiModels } from '../additional/Models'
 
 /**
  * Notes contain the raw information that is formatted into a number of cards
  * according to the models
  */
 @Entity({ name: 'notes' })
-class DbNotes {
+class AnkiNotes {
   /**
    * epoch seconds of when the note was created
    */
@@ -24,7 +24,7 @@ class DbNotes {
    * model id
    * REFERENCES models(id) in Col#models JSON
    */
-  @prop({ references: dbModels }) mid!: number
+  @prop({ references: ankiModels }) mid!: number
 
   /**
    * modificaton time as epoch seconds
@@ -86,9 +86,9 @@ class DbNotes {
   @prop({ default: '' }) data?: string
 }
 
-export const dbNotes = new Table(DbNotes)
+export const ankiNotes = new Table(AnkiNotes)
 
-dbNotes.on('pre-update', ({ set }) => {
+ankiNotes.on('pre-update', ({ set }) => {
   if (set.flds) {
     set.sfld = htmlToText.fromString(set.flds[0])
 

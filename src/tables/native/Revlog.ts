@@ -1,5 +1,5 @@
 import { Entity, primary, prop, Table } from 'liteorm'
-import { dbCards } from './Cards'
+import { ankiCards } from './Cards'
 
 /**
  * revlog is a review history; it has a row for every review you've ever done!
@@ -7,7 +7,7 @@ import { dbCards } from './Cards'
  * Is null in <https://github.com/patarapolw/ankisync/blob/master/dev/sample.json>
  */
 @Entity({ name: 'revlog' })
-class DbRevlog {
+class AnkiRevlog {
   /**
    * epoch-milliseconds timestamp of when you did the review
    */
@@ -16,7 +16,7 @@ class DbRevlog {
   /**
    * cards.id
    */
-  @prop({ type: 'int', references: dbCards, index: 'ix_revlog_cid' }) cid?: number
+  @prop({ type: 'int', references: ankiCards, index: 'ix_revlog_cid' }) cid?: number
 
   /**
    * update sequence number: for finding diffs when syncing.
@@ -54,4 +54,4 @@ class DbRevlog {
   @prop({ type: 'int' }) type?: number
 }
 
-export const dbRevlog = new Table(DbRevlog)
+export const ankiRevlog = new Table(AnkiRevlog)

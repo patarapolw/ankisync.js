@@ -5,8 +5,8 @@ import AdmZip from 'adm-zip'
 import SparkMD5 from 'spark-md5'
 import rimraf from 'rimraf'
 import { Db } from 'liteorm'
-import { dbCol, dbNotes, dbCards, dbRevlog, dbGraves, dbDecks, dbModels, dbTemplates, dbMedia } from './tables'
 import shortid from 'shortid'
+import { ankiCol, ankiNotes, ankiCards, ankiRevlog, ankiGraves, ankiDecks, ankiModels, ankiTemplates, ankiMedia } from './tables'
 
 export class Anki2 {
   public static async connect (colPath: string) {
@@ -14,26 +14,26 @@ export class Anki2 {
     const tables = await db.sql.all("SELECT name FROM sqlite_master WHERE type='table'")
 
     if (!tables.some((t) => t.name === 'col')) {
-      await db.init([dbCol, dbNotes, dbCards, dbRevlog, dbGraves])
+      await db.init([ankiCol, ankiNotes, ankiCards, ankiRevlog, ankiGraves])
     }
 
     if (!tables.some((t) => t.name === 'deck')) {
-      await db.init([dbDecks, dbModels, dbTemplates, dbMedia])
+      await db.init([ankiDecks, ankiModels, ankiTemplates, ankiMedia])
 
-      const { decks, models } = (await db.find(dbCol)({}, {
-        decks: dbCol.c.decks,
-        models: dbCol.c.models
+      const { decks, models } = (await db.find(ankiCol)({}, {
+        decks: ankiCol.c.decks,
+        models: ankiCol.c.models
       }, { limit: 1 }))[0]
 
       await Promise.all(Object.values(decks).map((d: any) => {
-        return db.create(dbDecks)({
+        return db.create(ankiDecks)({
           id: parseInt(d.id),
           name: d.name
         })
       }))
 
       await Promise.all(Object.values(models).map(async (model: any) => {
-        await db.create(dbModels)({
+        await db.create(ankiModels)({
           id: parseInt(model.id),
           name: model.name,
           flds: model.flds.map((f: any) => f.name),
@@ -41,7 +41,7 @@ export class Anki2 {
         })
 
         return await Promise.all(model.tmpls.map((t: any, i: number) => {
-          return db.create(dbTemplates)({
+          return db.create(ankiTemplates)({
             mid: parseInt(model.id),
             ord: i,
             name: t.name,
@@ -68,31 +68,31 @@ export class Anki2 {
   }
 
   async finalize () {
-    const col = await this.db.find(dbCol)({}, {
-      models: dbCol.c.models,
-      decks: dbCol.c.decks
+    const col = await this.db.find(ankiCol)({}, {
+      models: ankiCol.c.models,
+      decks: ankiCol.c.decks
     }, { limit: 1 })
 
     const { models, decks } = col[0]
 
     await Promise.all([
       (async () => {
-        await Promise.all((await this.db.find(dbModels)({}, {
-          id: dbModels.c.id
+        await Promise.all((await this.db.find(ankiModels)({}, {
+          id: ankiModels.c.id
         })).map(async (m) => {
-          models[m.id.toString()] = await dbModels.toJSON(this.db, m.id)
+          models[m.id.toString()] = await ankiModels.toJSON(this.db, m.id)
         }))
       })().catch(console.error),
       (async () => {
-        await Promise.all((await this.db.find(dbDecks)({}, {
-          id: dbDecks.c.id
+        await Promise.all((await this.db.find(ankiDecks)({}, {
+          id: ankiDecks.c.id
         })).map(async (d) => {
-          decks[d.id.toString()] = await dbDecks.toJSON(this.db, d.id)
+          decks[d.id.toString()] = await ankiDecks.toJSON(this.db, d.id)
         }))
       })().catch(console.error)
     ])
 
-    await this.db.update(dbCol)({}, {
+    await this.db.update(ankiCol)({}, {
       models,
       decks
     })
@@ -117,7 +117,7 @@ export class Apkg {
       await Promise.all(Object.keys(mediaJson).map((k) => {
         const data = fs.readFileSync(path.join(dir, k))
 
-        return anki2.db.create(dbMedia)({
+        return anki2.db.create(ankiMedia)({
           h: SparkMD5.ArrayBuffer.hash(data),
           name: mediaJson[k],
           data
@@ -145,10 +145,10 @@ export class Apkg {
     const zip = new AdmZip()
     zip.addLocalFile(path.join(this.dir, 'collection.anki2'))
 
-    ;(await this.anki2.db.find(dbModels)({}, {
-      id: dbMedia.c.id,
-      name: dbMedia.c.name,
-      data: dbMedia.c.data
+    ;(await this.anki2.db.find(ankiModels)({}, {
+      id: ankiMedia.c.id,
+      name: ankiMedia.c.name,
+      data: ankiMedia.c.data
     })).map((m) => {
       mediaJson[m.id.toString()] = m.name
       zip.addFile(m.name, m.data)
@@ -165,3 +165,5 @@ export class Apkg {
     rimraf.sync(this.dir)
   }
 }
+
+export * from './tables'

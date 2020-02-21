@@ -19,6 +19,7 @@ module.exports = {
     '@typescript-eslint'
   ],
   rules: {
-    'no-return-await': 0
+    'no-return-await': 0,
+    'no-unused-vars': 0
   }
 }

@@ -27,8 +27,7 @@ class AnkiCol {
    */
   @prop<Date>({
     type: 'int',
-    default: () => new Date(),
-    onUpdate: () => new Date(),
+    onChange: () => new Date(),
     transform: {
       get: (repr) => repr ? new Date(repr) : null,
       set: (d) => d ? +d : null

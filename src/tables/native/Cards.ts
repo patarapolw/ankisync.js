@@ -44,8 +44,7 @@ class AnkiCards {
    */
   @prop<Date>({
     type: 'int',
-    default: () => new Date(),
-    onUpdate: () => new Date(),
+    onChange: () => new Date(),
     transform: {
       get: (repr) => repr ? new Date(repr * 1000) : null,
       set: (d) => d ? +d / 1000 : null

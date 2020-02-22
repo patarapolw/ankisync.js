@@ -31,8 +31,7 @@ class AnkiNotes {
    */
   @prop<Date>({
     type: 'int',
-    default: () => new Date(),
-    onUpdate: () => new Date(),
+    onChange: () => new Date(),
     transform: {
       get: (repr) => repr ? new Date(repr * 1000) : null,
       set: (d) => d ? +d / 1000 : null
@@ -49,7 +48,7 @@ class AnkiNotes {
    * space-separated string of tags.
    * includes space at the beginning and end, for LIKE "% tag %" queries
    */
-  @prop({
+  @prop<string[]>({
     type: 'str',
     transform: {
       get: (repr) => repr ? repr.trim().split(' ').filter((s: string) => s) : null,
@@ -60,7 +59,7 @@ class AnkiNotes {
   /**
    * the values of the fields in this note. separated by 0x1f (31) character.
    */
-  @prop({
+  @prop<string[]>({
     type: 'str',
     transform: {
       get: (repr) => repr ? repr.split('\x1f') : null,

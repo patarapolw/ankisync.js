@@ -9,7 +9,7 @@ class AnkiModels {
   /**
    * Splitted by '\x1f'
    */
-  @prop({
+  @prop<string[]>({
     type: 'string',
     transform: {
       set: (flds) => flds ? flds.join('\x1f') : null,

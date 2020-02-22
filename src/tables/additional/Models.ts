@@ -87,6 +87,8 @@ ankiModels.toJSON = async (db, id) => {
   }
 
   const tmpls = await db.find(ankiTemplates)({ mid: id }, {
+    name: ankiTemplates.c.name,
+    ord: ankiTemplates.c.ord,
     mid: ankiTemplates.c.mid,
     afmt: ankiTemplates.c.afmt,
     qfmt: ankiTemplates.c.qfmt

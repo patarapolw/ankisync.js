@@ -1,6 +1,6 @@
 {
   "name": "ankisync",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
@@ -27,7 +27,7 @@
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
     "html-to-text": "^5.1.1",
-    "liteorm": "^0.7.11",
+    "liteorm": "^0.7.12",
     "rimraf": "^3.0.0",
     "shortid": "^2.2.15",
     "spark-md5": "^3.0.0",

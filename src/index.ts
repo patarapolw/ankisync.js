@@ -17,7 +17,7 @@ export class Anki2 {
       await db.init([ankiCol, ankiNotes, ankiCards, ankiRevlog, ankiGraves])
     }
 
-    if (!tables.some((t) => t.name === 'deck')) {
+    if (!tables.some((t) => t.name === 'decks')) {
       await db.init([ankiDecks, ankiModels, ankiTemplates, ankiMedia])
 
       const { decks, models } = (await db.find(ankiCol)({}, {
@@ -25,14 +25,14 @@ export class Anki2 {
         models: ankiCol.c.models
       }, { limit: 1 }))[0]
 
-      await Promise.all(Object.values(decks).map((d: any) => {
+      await Promise.all(Object.values(decks!).map((d) => {
         return db.create(ankiDecks)({
           id: parseInt(d.id),
           name: d.name
         })
       }))
 
-      await Promise.all(Object.values(models).map(async (model: any) => {
+      await Promise.all(Object.values(models!).map(async (model: any) => {
         await db.create(ankiModels)({
           id: parseInt(model.id),
           name: model.name,
@@ -80,14 +80,20 @@ export class Anki2 {
         await Promise.all((await this.db.find(ankiModels)({}, {
           id: ankiModels.c.id
         })).map(async (m) => {
-          models[m.id.toString()] = await ankiModels.toJSON(this.db, m.id)
+          const json = await ankiModels.toJSON(this.db, m.id!)
+          if (json) {
+            models![m.id!.toString()] = json
+          }
         }))
       })().catch(console.error),
       (async () => {
         await Promise.all((await this.db.find(ankiDecks)({}, {
           id: ankiDecks.c.id
         })).map(async (d) => {
-          decks[d.id.toString()] = await ankiDecks.toJSON(this.db, d.id)
+          const json = await ankiDecks.toJSON(this.db, d.id!)
+          if (json) {
+            decks![d.id!.toString()] = json
+          }
         }))
       })().catch(console.error)
     ])
@@ -96,6 +102,12 @@ export class Anki2 {
       models,
       decks
     })
+
+    // await db.init([ankiDecks, ankiModels, ankiTemplates, ankiMedia])
+    await this.db.sql.exec(`
+    DROP TABLE templates;
+    DROP TABLE models;
+    DROP TABLE decks`)
   }
 }
 
@@ -150,11 +162,17 @@ export class Apkg {
       name: ankiMedia.c.name,
       data: ankiMedia.c.data
     })).map((m) => {
-      mediaJson[m.id.toString()] = m.name
-      zip.addFile(m.name, m.data)
+      mediaJson[m.id!.toString()] = m.name
+      const b = Buffer.alloc(m.data.byteLength)
+      const bData = Buffer.from(m.data)
+      bData.copy(b)
+      zip.addFile(m.name, b)
     })
 
     zip.addFile('media', Buffer.from(JSON.stringify(mediaJson)))
+
+    await this.anki2.db.sql.exec('DROP TABLE media')
+    await this.anki2.db.sql.close()
 
     if (!overwrite && fs.existsSync(this.filePath)) {
       const p = path.parse(this.filePath)

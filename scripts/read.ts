@@ -1,29 +1,37 @@
 import { Apkg } from '../src'
-import { dbCards, dbNotes, dbDecks, dbModels } from '../src/tables'
+import { ankiCards, ankiNotes, ankiDecks, ankiModels, ankiTemplates } from '../lib'
 
 (async () => {
-  const apkg = await Apkg.connect('/Users/patarapolw/Downloads/Hanyu_Shuiping_Kaoshi_HSK_all_5000_words_high_quality.apkg')
+  const { anki2 } = await Apkg.connect('/Users/patarapolw/Downloads/Hanyu_Shuiping_Kaoshi_HSK_all_5000_words_high_quality.apkg')
 
-  console.log(await apkg.anki2.db.find(
-    dbCards,
+  const r = await anki2.db.find(
+    ankiCards,
     {
-      to: dbNotes,
-      from: dbCards.c.nid
+      to: ankiNotes,
+      from: ankiCards.c.nid
     },
     {
-      to: dbDecks,
-      from: dbCards.c.did
+      to: ankiDecks,
+      from: ankiCards.c.did
     },
     {
-      to: dbModels,
-      from: dbNotes.c.mid
+      to: ankiModels,
+      from: ankiNotes.c.mid
+    },
+    {
+      to: ankiTemplates,
+      cond: 'templates.mid = notes.mid AND templates.ord = cards.ord'
     }
   )({}, {
-    keys: dbModels.c.flds,
-    values: dbNotes.c.flds,
-    deck: dbDecks.c.name,
-    ord: dbCards.c.ord
-  }, { limit: 10, postfix: 'ORDER BY RANDOM()' }))
+    deck: ankiDecks.c.name,
+    values: ankiNotes.c.flds,
+    keys: ankiModels.c.flds,
+    css: ankiModels.c.css,
+    qfmt: ankiTemplates.c.qfmt,
+    afmt: ankiTemplates.c.afmt,
+    template: ankiTemplates.c.name,
+    model: ankiModels.c.name
+  }, { limit: 10, postfix: 'ORDER BY RANDOM()' })
 
-  await apkg.anki2.db.close()
+  console.log(r)
 })().catch(console.error)

@@ -38,10 +38,20 @@ class AnkiCards {
    * ```
    */
   @prop({ type: 'int' }) ord!: number
+
   /**
    * modificaton time as epoch seconds
    */
-  @prop({ type: 'int', default: () => +new Date() / 1000, onUpdate: () => +new Date() / 1000 }) mod?: number
+  @prop<Date>({
+    type: 'int',
+    default: () => new Date(),
+    onUpdate: () => new Date(),
+    transform: {
+      get: (repr) => repr ? new Date(repr * 1000) : null,
+      set: (d) => d ? +d / 1000 : null
+    }
+  }) mod?: Date
+
   /**
    * ```
    * update sequence number : used to figure out diffs when syncing.

@@ -29,11 +29,15 @@ class AnkiNotes {
   /**
    * modificaton time as epoch seconds
    */
-  @prop({
+  @prop<Date>({
     type: 'int',
-    default: () => +new Date() / 1000,
-    onUpdate: () => +new Date() / 1000
-  }) mod?: number
+    default: () => new Date(),
+    onUpdate: () => new Date(),
+    transform: {
+      get: (repr) => repr ? new Date(repr * 1000) : null,
+      set: (d) => d ? +d / 1000 : null
+    }
+  }) mod?: Date
 
   /**
    * update sequence number: for finding diffs when syncing.

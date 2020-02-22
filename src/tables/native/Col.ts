@@ -9,19 +9,31 @@ class AnkiCol {
    * arbitrary number since there is only one row
    */
   @primary({ autoincrement: true }) id?: number
+
   /**
    * created timestamp
    */
-  @prop({ type: 'int', default: () => +new Date() }) crt?: number
+  @prop<Date>({
+    type: 'int',
+    default: () => new Date(),
+    transform: {
+      get: (repr) => repr ? new Date(repr) : null,
+      set: (d) => d ? +d : null
+    }
+  }) crt?: Date
 
   /**
    * last modified in milliseconds
    */
-  @prop({
+  @prop<Date>({
     type: 'int',
-    default: () => +new Date(),
-    onUpdate: () => +new Date()
-  }) mod?: number
+    default: () => new Date(),
+    onUpdate: () => new Date(),
+    transform: {
+      get: (repr) => repr ? new Date(repr) : null,
+      set: (d) => d ? +d : null
+    }
+  }) mod?: Date
 
   /**
    * schema mod time: time when "schema" was modified.

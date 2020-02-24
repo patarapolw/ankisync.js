@@ -1,10 +1,11 @@
 {
   "name": "ankisync",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
-    "ankisync"
+    "ankisync",
+    "liteorm"
   ],
   "repository": {
     "type": "git",
@@ -30,7 +31,6 @@
     "liteorm": "^0.7.15",
     "rimraf": "^3.0.0",
     "shortid": "^2.2.15",
-    "spark-md5": "^3.0.0",
     "sqlite": "^3.0.3"
   },
   "devDependencies": {
@@ -39,7 +39,6 @@
     "@types/html-to-text": "^1.4.31",
     "@types/rimraf": "^2.0.2",
     "@types/shortid": "^0.0.29",
-    "@types/spark-md5": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
     "eslint": ">=6.2.2",

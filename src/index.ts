@@ -1,8 +1,8 @@
 import path from 'path'
+import crypto from 'crypto'
 
 import fs from 'fs-extra'
 import AdmZip from 'adm-zip'
-import SparkMD5 from 'spark-md5'
 import rimraf from 'rimraf'
 import { Db } from 'liteorm'
 import shortid from 'shortid'
@@ -109,6 +109,11 @@ export class Anki2 {
     DROP TABLE models;
     DROP TABLE decks`)
   }
+
+  /**
+   * There is no need to cleanup as of current.
+   */
+  async cleanup () {}
 }
 
 export class Apkg {
@@ -130,7 +135,7 @@ export class Apkg {
         const data = fs.readFileSync(path.join(dir, k))
 
         return anki2.db.create(ankiMedia)({
-          h: SparkMD5.ArrayBuffer.hash(data),
+          h: crypto.createHash('sha256').update(data).digest('base64'),
           name: mediaJson[k],
           data
         })
@@ -180,6 +185,16 @@ export class Apkg {
     }
 
     zip.writeZip(this.filePath)
+    rimraf.sync(this.dir)
+  }
+
+  /**
+   * You will lose any unsaved data.
+   *
+   * Use #finalize to save data.
+   */
+  async cleanup () {
+    await this.anki2.cleanup()
     rimraf.sync(this.dir)
   }
 }

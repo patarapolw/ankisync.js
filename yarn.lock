@@ -1214,10 +1214,10 @@ levn@^0.3.0, levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-liteorm@^0.7.15:
-  version "0.7.15"
-  resolved "https://registry.yarnpkg.com/liteorm/-/liteorm-0.7.15.tgz#06ebcb3c2e860942fec4574b616ff48e78712844"
-  integrity sha512-VafHCMgQTQoIG4UGCjMVVLA7xrLQrC5wNmuzjkLi75RnjUh6NhtGyBsO5tVw/Jszm86envunMCilSrTZ6TuGTA==
+liteorm@^0.7.18:
+  version "0.7.18"
+  resolved "https://registry.yarnpkg.com/liteorm/-/liteorm-0.7.18.tgz#76c368c87fa515795e8c2c180684a33c927cfaf3"
+  integrity sha512-j1exIao4aGU3cWqjWyM4hMOHgUv0FE6V5MPFQrGUrkaWgMOykzQi1I53SkYrEFRjs91IRMwcWCTaHVGPlOz3uQ==
   dependencies:
     bluebird "^3.5.5"
     bluebird-global "^1.0.1"

@@ -34,6 +34,7 @@
     "sqlite": "^3.0.3"
   },
   "devDependencies": {
+    "@patarapolw/prettyprint": "^1.0.2",
     "@types/adm-zip": "^0.4.32",
     "@types/fs-extra": "^8.0.0",
     "@types/html-to-text": "^1.4.31",
@@ -41,14 +42,12 @@
     "@types/shortid": "^0.0.29",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
-    "chalk": "^3.0.0",
     "eslint": ">=6.2.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": ">=2.18.0",
     "eslint-plugin-node": ">=9.1.0",
     "eslint-plugin-promise": ">=4.2.1",
     "eslint-plugin-standard": ">=4.0.0",
-    "typescript": "^3.7.5",
-    "yamprint": "^0.8.4"
+    "typescript": "^3.7.5"
   }
 }

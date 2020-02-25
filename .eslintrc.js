@@ -20,6 +20,7 @@ module.exports = {
   ],
   rules: {
     'no-return-await': 0,
-    'no-unused-vars': 0
+    'no-unused-vars': 0,
+    'no-useless-constructor': 0
   }
 }

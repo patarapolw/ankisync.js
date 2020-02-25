@@ -1,6 +1,6 @@
 {
   "name": "ankisync",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
@@ -28,7 +28,7 @@
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
     "html-to-text": "^5.1.1",
-    "liteorm": "^0.7.18",
+    "liteorm": "^0.8.1",
     "rimraf": "^3.0.0",
     "shortid": "^2.2.15",
     "sqlite": "^3.0.3"
@@ -41,12 +41,14 @@
     "@types/shortid": "^0.0.29",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
+    "chalk": "^3.0.0",
     "eslint": ">=6.2.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": ">=2.18.0",
     "eslint-plugin-node": ">=9.1.0",
     "eslint-plugin-promise": ">=4.2.1",
     "eslint-plugin-standard": ">=4.0.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "yamprint": "^0.8.4"
   }
 }

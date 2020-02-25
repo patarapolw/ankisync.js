@@ -75,18 +75,18 @@ export const ankiModels = new Table(AnkiModels) as Table<AnkiModels> & {
  * ```
  */
 ankiModels.toJSON = async (db, id) => {
-  const r = await db.find(ankiModels)({ id }, {
+  const r = await db.first(ankiModels)({ id }, {
     id: ankiModels.c.id,
     css: ankiModels.c.css,
     flds: ankiModels.c.flds,
     name: ankiModels.c.name
   }, { limit: 1 })
 
-  if (!r[0]) {
+  if (!r) {
     return null
   }
 
-  const tmpls = await db.find(ankiTemplates)({ mid: id }, {
+  const tmpls = await db.all(ankiTemplates)({ mid: id }, {
     name: ankiTemplates.c.name,
     ord: ankiTemplates.c.ord,
     mid: ankiTemplates.c.mid,
@@ -97,9 +97,9 @@ ankiModels.toJSON = async (db, id) => {
   })
 
   return {
-    id: r[0].id,
-    css: r[0].css,
-    flds: r[0].flds.map((f: string) => ({
+    id: r.id,
+    css: r.css,
+    flds: r.flds.map((f: string) => ({
       size: 20,
       name: f,
       media: [],
@@ -118,7 +118,7 @@ ankiModels.toJSON = async (db, id) => {
       bqfmt: ''
     })),
     vers: [],
-    name: r[0].name,
+    name: r.name,
     tags: [],
     did: 1,
     usn: -1,

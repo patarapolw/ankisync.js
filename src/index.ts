@@ -20,10 +20,10 @@ export class Anki2 {
     if (!tables.some((t) => t.name === 'decks')) {
       await db.init([ankiDecks, ankiModels, ankiTemplates, ankiMedia])
 
-      const { decks, models } = (await db.find(ankiCol)({}, {
+      const { decks, models } = (await db.first(ankiCol)({}, {
         decks: ankiCol.c.decks,
         models: ankiCol.c.models
-      }, { limit: 1 }))[0]
+      }, { limit: 1 }))!
 
       await Promise.all(Object.values(decks!).map((d) => {
         return db.create(ankiDecks)({
@@ -63,21 +63,59 @@ export class Anki2 {
     this.colPath = params.colPath
   }
 
+  async each (cb: (entry: any) => void, filter: any = {}, options: {
+    offset?: number
+    limit?: number
+    sort?: {
+      key: string
+      desc?: boolean
+    }
+  } = {}) {
+    return this.db.each(
+      ankiCards,
+      {
+        to: ankiNotes,
+        from: ankiCards.c.nid
+      },
+      {
+        to: ankiDecks,
+        from: ankiCards.c.did
+      },
+      {
+        to: ankiModels,
+        from: ankiNotes.c.mid
+      },
+      {
+        to: ankiTemplates,
+        cond: 'templates.mid = notes.mid AND templates.ord = cards.ord'
+      }
+    )(filter, {
+      deck: ankiDecks.c.name,
+      values: ankiNotes.c.flds,
+      keys: ankiModels.c.flds,
+      css: ankiModels.c.css,
+      qfmt: ankiTemplates.c.qfmt,
+      afmt: ankiTemplates.c.afmt,
+      template: ankiTemplates.c.name,
+      model: ankiModels.c.name
+    }, options)(cb)
+  }
+
   async close () {
     await this.db.close()
   }
 
   async finalize () {
-    const col = await this.db.find(ankiCol)({}, {
+    const col = (await this.db.first(ankiCol)({}, {
       models: ankiCol.c.models,
       decks: ankiCol.c.decks
-    }, { limit: 1 })
+    }, { limit: 1 }))!
 
-    const { models, decks } = col[0]
+    const { models, decks } = col
 
     await Promise.all([
       (async () => {
-        await Promise.all((await this.db.find(ankiModels)({}, {
+        await Promise.all((await this.db.all(ankiModels)({}, {
           id: ankiModels.c.id
         })).map(async (m) => {
           const json = await ankiModels.toJSON(this.db, m.id!)
@@ -87,7 +125,7 @@ export class Anki2 {
         }))
       })().catch(console.error),
       (async () => {
-        await Promise.all((await this.db.find(ankiDecks)({}, {
+        await Promise.all((await this.db.all(ankiDecks)({}, {
           id: ankiDecks.c.id
         })).map(async (d) => {
           const json = await ankiDecks.toJSON(this.db, d.id!)
@@ -162,7 +200,7 @@ export class Apkg {
     const zip = new AdmZip()
     zip.addLocalFile(path.join(this.dir, 'collection.anki2'))
 
-    ;(await this.anki2.db.find(ankiModels)({}, {
+    ;(await this.anki2.db.all(ankiModels)({}, {
       id: ankiMedia.c.id,
       name: ankiMedia.c.name,
       data: ankiMedia.c.data

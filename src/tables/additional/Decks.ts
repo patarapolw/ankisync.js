@@ -11,18 +11,18 @@ export const ankiDecks = new Table(AnkiDecks) as Table<AnkiDecks> & {
 }
 
 ankiDecks.toJSON = async (db, id) => {
-  const r = await db.find(ankiDecks)({ id }, {
+  const r = await db.first(ankiDecks)({ id }, {
     id: ankiDecks.c.id,
     name: ankiDecks.c.name
   }, { limit: 1 })
 
-  if (!r[0]) {
+  if (!r) {
     return null
   }
 
   return {
     id,
-    name: r[0].name,
+    name: r.name,
     extendRev: 50,
     usn: 0,
     collapsed: false,

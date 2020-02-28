@@ -1,6 +1,6 @@
 {
   "name": "ankisync",
-  "version": "0.4.9",
+  "version": "0.4.11",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
@@ -17,7 +17,8 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib",
-    "src"
+    "src",
+    "tsconfig.json"
   ],
   "scripts": {
     "build": "tsc -p src/tsconfig.json",
@@ -28,7 +29,7 @@
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
     "html-to-text": "^5.1.1",
-    "liteorm": "^0.8.1",
+    "liteorm": "^0.8.3",
     "rimraf": "^3.0.0",
     "shortid": "^2.2.15",
     "sqlite": "^3.0.3"

@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import fs from 'fs-extra'
 import AdmZip from 'adm-zip'
 import rimraf from 'rimraf'
-import { Db } from 'liteorm'
+import { Db, UndefinedEqNull } from 'liteorm'
 import shortid from 'shortid'
 import { ankiCol, ankiNotes, ankiCards, ankiRevlog, ankiGraves, ankiDecks, ankiModels, ankiTemplates, ankiMedia } from './tables'
 
@@ -63,7 +63,16 @@ export class Anki2 {
     this.colPath = params.colPath
   }
 
-  async each (cb: (entry: any) => void, filter: any = {}, options: {
+  async each (cb: (entry: UndefinedEqNull<{
+      deck: string;
+      values: string[];
+      keys: string[];
+      css: string | undefined;
+      qfmt: string;
+      afmt: string | undefined;
+      template: string;
+      model: string;
+  }>) => void, filter: any = {}, options: {
     offset?: number
     limit?: number
     sort?: {

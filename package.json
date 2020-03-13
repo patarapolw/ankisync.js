@@ -1,6 +1,6 @@
 {
   "name": "ankisync",
-  "version": "0.4.12",
+  "version": "0.5.0",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
@@ -23,24 +23,20 @@
   "scripts": {
     "build": "tsc -p src/tsconfig.json",
     "prepack": "yarn build",
-    "test": "ts-mocha tests/**/*.spec.ts"
+    "test": "ts-mocha tests/**/*.spec.ts",
+    "preinstall": "if !(test -x is-npm); then is-npm; fi"
   },
   "dependencies": {
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
-    "html-to-text": "^5.1.1",
-    "liteorm": "^0.8.4",
-    "rimraf": "^3.0.0",
-    "shortid": "^2.2.15",
-    "sqlite": "^3.0.3"
+    "knex": "^0.20.11",
+    "rimraf": "^3.0.0"
   },
   "devDependencies": {
     "@patarapolw/prettyprint": "^1.0.2",
     "@types/adm-zip": "^0.4.32",
     "@types/fs-extra": "^8.0.0",
-    "@types/html-to-text": "^1.4.31",
     "@types/rimraf": "^2.0.2",
-    "@types/shortid": "^0.0.29",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
     "eslint": ">=6.2.2",
@@ -49,6 +45,10 @@
     "eslint-plugin-node": ">=9.1.0",
     "eslint-plugin-promise": ">=4.2.1",
     "eslint-plugin-standard": ">=4.0.0",
+    "sqlite3": "^4.1.1",
     "typescript": "^3.7.5"
+  },
+  "peerDependencies": {
+    "sqlite3": "^4.1.1"
   }
 }

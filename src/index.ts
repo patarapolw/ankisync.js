@@ -235,9 +235,6 @@ export class Anki2 {
     await this.db.schema.dropTable('decks')
   }
 
-  /**
-   * There is no need to cleanup as of current.
-   */
   async cleanup () {
     await this.db.destroy()
   }

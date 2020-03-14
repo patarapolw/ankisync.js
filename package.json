@@ -1,6 +1,6 @@
 {
   "name": "ankisync",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
@@ -18,19 +18,20 @@
   "files": [
     "lib",
     "src",
-    "tsconfig.json"
+    "tsconfig.json",
+    ".npmrc"
   ],
   "scripts": {
     "build": "tsc -p src/tsconfig.json",
-    "prepack": "yarn build",
+    "prepack": "npm run build",
     "test": "ts-mocha tests/**/*.spec.ts",
     "preinstall": "if !(test -x is-npm); then is-npm; fi"
   },
   "dependencies": {
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
-    "knex": "^0.20.11",
-    "rimraf": "^3.0.0"
+    "rimraf": "^3.0.0",
+    "sqlite3-async": "^1.0.3"
   },
   "devDependencies": {
     "@patarapolw/prettyprint": "^1.0.2",
@@ -39,6 +40,7 @@
     "@types/rimraf": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
+    "bluebird": "^3.7.2",
     "eslint": ">=6.2.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": ">=2.18.0",

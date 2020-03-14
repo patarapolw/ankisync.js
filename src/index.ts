@@ -4,22 +4,19 @@ import crypto from 'crypto'
 import fs from 'fs-extra'
 import AdmZip from 'adm-zip'
 import rimraf from 'rimraf'
-import knex from 'knex'
+import sqlite3, { Database } from 'sqlite3-async'
 
 import { mapAsync } from './utils'
 
 export class Anki2 {
   public static async connect (colPath: string) {
-    const db = knex({
-      client: 'sqlite3',
-      connection: {
-        filename: colPath
-      },
-      useNullAsDefault: true
-    })
+    const db = await sqlite3.openAsync(colPath)
+    const tables = (await db.allAsync(/*sql*/`
+      SELECT name FROM sqlite_master WHERE type='table'
+    `)).map((t) => t.name as string)
 
-    if (!(await db.schema.hasTable('decks'))) {
-      await mapAsync(/*sql*/`
+    if (!tables.includes('deck')) {
+      await db.execAsync(/*sql*/`
         CREATE TABLE IF NOT EXISTS decks (
           id      INTEGER PRIMARY KEY,
           [name]  TEXT NOT NULL
@@ -44,34 +41,29 @@ export class Anki2 {
           qfmt    TEXT NOT NULL,
           afmt    TEXT
         )
-      `.split(';'), async (el) => db.raw(el))
+      `)
 
-      const { decks, models } = await db.select('decks', 'models').from('col').first()
+      const { decks, models } = await db.getAsync(/*sql*/`
+        SELECT decks, models FROM col
+      `)
 
       await mapAsync(Object.values(JSON.parse(decks)), async (d: any) => {
-        console.log(d)
-        return await db('decks').insert({
-          id: parseInt(d.id),
-          name: d.name
-        })
+        await db.runAsync(/*sql*/`
+          INSERT INTO decks (id, [name]) VALUES (?, ?)
+        `, [parseInt(d.id), d.name])
       })
 
       await mapAsync(Object.values(JSON.parse(models)), async (m: any) => {
-        await db('models').insert({
-          id: parseInt(m.id),
-          name: m.name,
-          flds: m.flds.map((f: any) => f.name).join('\x1f'),
-          css: m.css
-        })
+        await db.runAsync(/*sql*/`
+          INSERT INTO models (id, [name], flds, css)
+          VALUES (?, ?, ?, ?)
+        `, [parseInt(m.id), m.name, m.flds.map((f: any) => f.name).join('\x1f'), m.css])
 
         await mapAsync(m.tmpls, async (t: any, i: number) => {
-          await db('templates').insert({
-            mid: parseInt(m.id),
-            ord: i,
-            name: t.name,
-            qfmt: t.qfmt,
-            afmt: t.afmt
-          })
+          await db.runAsync(/*sql*/`
+            INSERT INTO templates (mid, ord, [name], qfmt, afmt)
+            VALUES (?, ?, ?, ?, ?)
+          `, [parseInt(m.id), i, t.name, t.qfmt, t.afmt])
         })
       })
     }
@@ -79,22 +71,15 @@ export class Anki2 {
     return new Anki2({ colPath, db })
   }
 
-  db: knex
+  db: Database
   colPath: string;
 
-  private constructor (params: { colPath: string, db: knex }) {
+  private constructor (params: { colPath: string, db: Database }) {
     this.db = params.db
     this.colPath = params.colPath
   }
 
-  async find (filter: any = {}, options: {
-    offset?: number
-    limit?: number
-    sort?: {
-      key: string
-      desc?: boolean
-    }
-  } = {}): Promise<{
+  async find (where?: string, postfix?: string): Promise<{
     deck: string;
     values: string[];
     keys: string[];
@@ -104,27 +89,24 @@ export class Anki2 {
     template: string;
     model: string;
   }[]> {
-    return (
-      await this.db
-        .select(
-          this.db.ref('d.name').as('deck'),
-          this.db.ref('n.flds').as('values'),
-          this.db.ref('m.flds').as('keys'),
-          this.db.ref('m.css').as('css'),
-          this.db.ref('t.qfmt').as('qfmt'),
-          this.db.ref('t.afmt').as('afmt'),
-          this.db.ref('t.name').as('template'),
-          this.db.ref('m.name').as('model')
-        )
-        .from('cards AS c')
-        .join('notes AS n', 'c.nid', 'n.id')
-        .join('decks AS d', 'c.did', 'd.id')
-        .join('models AS m', 'n.mid', 'm.id')
-        .join('templates AS t', function () {
-          this.on('t.mid', 'n.mid').andOn('t.ord', 'c.ord')
-        })
-        .where(filter)
-    ).map((el) => {
+    return (await this.db.allAsync(/*sql*/`
+      SELECT
+        d.name AS deck,
+        n.flds AS [values],
+        m.flds AS keys,
+        m.css AS css,
+        t.qfmt AS qfmt,
+        t.afmt AS afmt,
+        t.name AS template,
+        m.name AS model
+      FROM cards AS c
+      JOIN notes AS n ON c.nid = n.id
+      JOIN decks AS d ON c.did = d.id
+      JOIN models AS m ON n.mid = m.id
+      JOIN templates AS t ON t.ord = c.ord AND t.mid = n.mid
+      ${where ? `WHERE ${where}` : ''}
+      ${postfix || ''}
+    `)).map((el) => {
       el.keys = el.keys.split('\x1f')
       el.values = el.values.split('\x1f')
 
@@ -133,15 +115,19 @@ export class Anki2 {
   }
 
   async finalize () {
-    const { models, decks } = await this.db.select('models', 'decks').from('col').first()
+    const { models, decks } = await this.db.getAsync(/*sql*/`
+      SELECT models, decks FROM col
+    `)
     const ms = JSON.parse(models)
     const ds = JSON.parse(decks)
 
-    await mapAsync(await this.db.select('id', 'name', 'flds', 'css').from('models'), async (m: any) => {
-      const ts = await this.db.select('name', 'ord', 'qfmt', 'afmt')
-        .from('templates')
-        .where('mid', '=', m.id)
-        .orderBy('ord')
+    await mapAsync(await this.db.allAsync(/*sql*/`
+      SELECT id, [name], flds, css FROM models
+    `), async (m: any) => {
+      const ts = await this.db.allAsync(/*sql*/`
+        SELECT [name], ord, qfmt, afmt FROM templates
+        WHERE mid = ? ORDER BY ord
+      `, [m.id])
 
       ms[m.id.toString()] = {
         id: m.id,
@@ -194,7 +180,9 @@ export class Anki2 {
       }
     });
 
-    (await this.db.select('id', 'name').from('decks')).map((d) => {
+    (await this.db.allAsync(/*sql*/`
+      SELECT id, [name] FROM decks
+    `)).map((d) => {
       ds[d.id.toString()] = {
         id: d.id,
         name: d.name,
@@ -225,18 +213,20 @@ export class Anki2 {
       }
     })
 
-    await this.db('col').update({
-      models: JSON.stringify(ms),
-      decks: JSON.stringify(ds)
-    })
+    await this.db.runAsync(/*sql*/`
+      UPDATE col
+      SET models = ?, decks = ?
+    `, [JSON.stringify(ms), JSON.stringify(ds)])
 
-    await this.db.schema.dropTable('templates')
-    await this.db.schema.dropTable('models')
-    await this.db.schema.dropTable('decks')
+    await this.db.execAsync(/*sql*/`
+      DROP TABLE templates;
+      DROP TABLE models;
+      DROP TABLE decks;
+    `)
   }
 
   async cleanup () {
-    await this.db.destroy()
+    await this.db.closeAsync()
   }
 }
 
@@ -258,10 +248,13 @@ export class Apkg {
       await Promise.all(Object.keys(mediaJson).map((k) => {
         const data = fs.readFileSync(path.join(dir, k))
 
-        return anki2.db('media').insert({
-          h: crypto.createHash('sha256').update(data).digest('base64'),
-          name: mediaJson[k]
-        })
+        anki2.db.runAsync(/*sql*/`
+          INSERT INTO media (h, [name])
+          VALUES (?, ?)
+        `, [
+          crypto.createHash('sha256').update(data).digest('base64'),
+          mediaJson[k]
+        ])
       }))
     }
 
@@ -285,15 +278,16 @@ export class Apkg {
     const zip = new AdmZip()
     zip.addLocalFile(path.join(this.dir, 'collection.anki2'));
 
-    (await this.anki2.db.select('id', 'name').from('media')).map((m) => {
+    (await this.anki2.db.allAsync(/*sql*/`
+      SELECT id, [name] FROM media
+    `)).map((m) => {
       mediaJson[m.id.toString()] = m.name
       zip.addFile(m.name, fs.readFileSync(path.join(this.dir, m.id.toString())))
     })
 
     zip.addFile('media', Buffer.from(JSON.stringify(mediaJson)))
 
-    await this.anki2.db.schema.dropTable('media')
-    await this.anki2.db.destroy()
+    await this.anki2.db.closeAsync()
 
     if (!overwrite) {
       const originalFilePath = this.filePath

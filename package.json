@@ -1,56 +1,83 @@
 {
   "name": "ankisync",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Do in Anki what Anki cannot do",
   "keywords": [
     "anki",
     "ankisync",
-    "liteorm"
+    "anki-flashcards",
+    "ankiconnect"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/patarapolw/ankisync.js.git"
   },
   "license": "MIT",
-  "author": "Pacharapol Withayasakpunt",
+  "author": {
+    "name": "Pacharapol Withayasakpunt",
+    "email": "polv@polv.cc",
+    "url": "https://www.polv.cc"
+  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib",
     "src",
-    "tsconfig.json",
-    ".npmrc"
+    "tsconfig.json"
   ],
   "scripts": {
     "build": "tsc -p src/tsconfig.json",
     "prepack": "npm run build",
-    "test": "ts-mocha tests/**/*.spec.ts",
-    "preinstall": "if !(test -x is-npm); then is-npm; fi"
+    "test": "ts-mocha tests/**/*.spec.ts"
   },
   "dependencies": {
-    "adm-zip": "^0.4.13",
+    "adm-zip": "^0.4.16",
+    "axios": "^0.21.0",
+    "bluebird": "^3.7.2",
+    "bluebird-global": "^1.0.1",
     "fs-extra": "^8.1.0",
-    "rimraf": "^3.0.0",
-    "sqlite3-async": "^1.0.3"
+    "liteorm": "github:patarapolw/liteorm",
+    "nanoid": "^3.1.16",
+    "rimraf": "^3.0.2",
+    "sqlite3": "^5.0.0",
+    "string-strip-html": "^6.3.0"
   },
   "devDependencies": {
-    "@patarapolw/prettyprint": "^1.0.2",
-    "@types/adm-zip": "^0.4.32",
-    "@types/fs-extra": "^8.0.0",
-    "@types/rimraf": "^2.0.2",
-    "@typescript-eslint/eslint-plugin": "^2.19.2",
-    "@typescript-eslint/parser": "^2.19.2",
-    "bluebird": "^3.7.2",
-    "eslint": ">=6.2.2",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": ">=2.18.0",
-    "eslint-plugin-node": ">=9.1.0",
-    "eslint-plugin-promise": ">=4.2.1",
-    "eslint-plugin-standard": ">=4.0.0",
-    "sqlite3": "^4.1.1",
-    "typescript": "^3.7.5"
+    "@types/adm-zip": "^0.4.33",
+    "@types/fs-extra": "^8.1.1",
+    "@types/nanoid": "^2.1.0",
+    "@types/rimraf": "^2.0.4",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "^4.8.1",
+    "eslint": "^7.13.0",
+    "eslint-config-standard": "^15.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.1.0",
+    "husky": "^4.3.0",
+    "import-sort-parser-typescript": "^6.0.0",
+    "prettier": "^2.1.2",
+    "sqlite": "^4.0.17",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.5"
   },
-  "peerDependencies": {
-    "sqlite3": "^4.1.1"
+  "engines": {
+    "node": "12.x",
+    "npm": "please-use-pnpm",
+    "pnpm": "5.x",
+    "yarn": "please-use-pnpm"
+  },
+  "engineStrict": true,
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "parser": "typescript",
+      "style": "module"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pnpm build"
+    }
   }
 }

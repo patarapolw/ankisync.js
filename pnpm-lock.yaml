@@ -4,7 +4,7 @@ dependencies:
   bluebird: 3.7.2
   bluebird-global: 1.0.1_bluebird@3.7.2
   fs-extra: 8.1.0
-  liteorm: github.com/patarapolw/liteorm/cff8dc52c66f4a84851388ee2225e1d393873c6b_e1c178375e4da714b1055ea17ae9cff9
+  liteorm: 'link:../../.nvm/versions/node/v12.19.0/pnpm-global/node_modules/liteorm'
   nanoid: 3.1.16
   reflect-metadata: 0.1.13
   rimraf: 3.0.2
@@ -691,12 +691,6 @@ packages:
     optional: true
     resolution:
       integrity: sha1-OoOpBOVDUyh4dMVkt1SThoSamMk=
-  /emittery/0.7.2:
-    dev: false
-    engines:
-      node: '>=10'
-    resolution:
-      integrity: sha512-A8OG5SR/ij3SsJdWDJdkkSYUjQdCUx6APQXem0SaEePBSRg4eymGYwBkKo1Y6DU+af/Jn2dBQqDBvjnr9Vi8nQ==
   /emoji-regex/7.0.3:
     dev: true
     resolution:
@@ -2751,28 +2745,6 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
-  github.com/patarapolw/liteorm/cff8dc52c66f4a84851388ee2225e1d393873c6b_e1c178375e4da714b1055ea17ae9cff9:
-    dependencies:
-      bluebird: 3.7.2
-      bluebird-global: 1.0.1_bluebird@3.7.2
-      emittery: 0.7.2
-      reflect-metadata: 0.1.13
-      sqlite3: 5.0.0
-    dev: false
-    engines:
-      node: 12.x
-      npm: please-use-pnpm
-      pnpm: 5.x
-      yarn: please-use-pnpm
-    id: github.com/patarapolw/liteorm/cff8dc52c66f4a84851388ee2225e1d393873c6b
-    name: liteorm
-    peerDependencies:
-      bluebird: ^3.7.2
-      bluebird-global: ^1.0.1
-      sqlite3: ^5.0.0
-    resolution:
-      tarball: 'https://codeload.github.com/patarapolw/liteorm/tar.gz/cff8dc52c66f4a84851388ee2225e1d393873c6b'
-    version: 0.9.4
 specifiers:
   '@types/adm-zip': ^0.4.33
   '@types/fs-extra': ^8.1.1

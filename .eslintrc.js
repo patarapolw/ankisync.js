@@ -3,9 +3,10 @@ module.exports = {
     es2020: true,
     node: true
   },
-  extends: [
-    'standard'
-  ],
+  extends: ['standard'],
+  globals: {
+    NodeJS: 'readonly'
+  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 12,

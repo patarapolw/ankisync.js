@@ -1,3 +1,5 @@
+import { spawnSync } from 'child_process'
+import fs from 'fs'
 import os from 'os'
 import path from 'path'
 
@@ -7,14 +9,29 @@ import path from 'path'
  * Tools >> Add-ons >> View Files
  */
 export function getAnkiPath(user: string) {
-  const root =
-    ({
-      win32: process.env.APPDATA!,
-      darwin: path.join(process.env.HOME!, 'Library/Application Support')
-    } as Record<string, string>)[os.platform()] ||
-    path.join(process.env.HOME!, '.local/share')
+  const root = () => {
+    switch (os.platform()) {
+      case 'linux':
+        if (fs.readFileSync('/proc/version', 'utf8').includes('microsoft')) {
+          return path.join(
+            '/mnt',
+            spawnSync('cmd.exe', ['/c', 'echo', '%APPDATA%'])
+              .stdout.toString()
+              .trim()
+              .replace(/^(\S+):/, (_, p: string) => p.toLocaleLowerCase())
+              .replace(/\\/g, '/')
+          )
+        }
+        break
+      case 'win32':
+        return process.env.APPDATA!
+      case 'darwin':
+        return path.join(process.env.HOME!, 'Library/Application Support')
+    }
 
-  return path.join(root, 'Anki2', user)
+    return path.join(process.env.HOME!, '.local/share')
+  }
+  return path.join(root(), 'Anki2', user)
 }
 
 /**

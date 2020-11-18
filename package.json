@@ -38,6 +38,7 @@
     "fs-extra": "^8.1.0",
     "liteorm": "github:patarapolw/liteorm",
     "nanoid": "^3.1.16",
+    "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "sqlite3": "^5.0.0",
     "string-strip-html": "^6.3.0"
@@ -57,6 +58,7 @@
     "eslint-plugin-standard": "^4.1.0",
     "husky": "^4.3.0",
     "import-sort-parser-typescript": "^6.0.0",
+    "open": "^7.3.0",
     "prettier": "^2.1.2",
     "sqlite": "^4.0.17",
     "ts-node": "^9.0.0",

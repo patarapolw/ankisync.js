@@ -9,7 +9,8 @@ import path from 'path'
 export function getAnkiPath(user: string) {
   const root =
     ({
-      win32: process.env.APPDATA!
+      win32: process.env.APPDATA!,
+      darwin: path.join(process.env.HOME!, 'Library/Application Support')
     } as Record<string, string>)[os.platform()] ||
     path.join(process.env.HOME!, '.local/share')
 

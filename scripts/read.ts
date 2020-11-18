@@ -1,11 +1,27 @@
-import { pp } from '@patarapolw/prettyprint'
+import fs from 'fs-extra'
 
-import { Apkg } from '../src'
+import { dbCards, dbDecks, dbNotes, initDatabase } from '../lib/anki21'
+import { getAnkiCollection } from '../lib/dir'
 
-;(async () => {
-  const apkg = await Apkg.connect('/Users/patarapolw/Downloads/Hanyu_Shuiping_Kaoshi_HSK_all_5000_words_high_quality.apkg')
+async function main() {
+  fs.copyFileSync(getAnkiCollection('User 1'), 'collection.anki2')
+  const db = initDatabase('collection.anki2')
 
-  pp(await apkg.anki2.find())
+  const rs = await db.all(dbNotes, dbCards, dbDecks)(
+    {},
+    {
+      deck: dbDecks.c.name,
+      tags: dbNotes.c.tags,
+      nid: dbNotes.c.id
+    },
+    {
+      limit: 10
+    }
+  )
 
-  await apkg.cleanup()
-})().catch(console.error)
+  console.log(rs)
+}
+
+if (require.main === module) {
+  main().catch(console.error)
+}

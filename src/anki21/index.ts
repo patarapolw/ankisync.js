@@ -2,8 +2,6 @@ import { Db, Entity, Table, primary, prop } from 'liteorm'
 import { nanoid } from 'nanoid'
 import stripHtml from 'string-strip-html'
 
-import { dbModels } from '../anki20'
-
 /**
  * col contains a single row that holds various information about the collection
  *
@@ -198,7 +196,7 @@ export class Notes {
   @primary({ autoincrement: true }) id!: number
   @prop({ unique: true, default: () => nanoid() }) guid?: string
 
-  @prop({ type: 'int', references: dbModels, index: 'idx_notes_mid' })
+  @prop({ type: 'int', references: dbNotetypes, index: 'idx_notes_mid' })
   mid!: number
 
   @prop({ type: 'int', onChange: () => Math.floor(+new Date()) }) mod?: number
@@ -383,6 +381,7 @@ dbCards.on('pre-create', (d) => {
   );
  * ```
  */
+@Entity()
 export class Revlog {
   @primary({ autoincrement: true }) id?: number
   @prop({ type: 'int', references: dbCards, index: 'ix_revlog_cid' })
@@ -399,7 +398,7 @@ export class Revlog {
 
 export const dbRevlog = new Table(Revlog)
 
-export async function initDatabase(filename: string) {
+export function initDatabase(filename: string) {
   const db = new Db(filename)
   return db
 }

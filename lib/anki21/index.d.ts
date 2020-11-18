@@ -297,5 +297,5 @@ export declare class Revlog {
     type: number;
 }
 export declare const dbRevlog: Table<Revlog, {}, Revlog>;
-export declare function initDatabase(filename: string): Promise<Db>;
+export declare function initDatabase(filename: string): Db;
 //# sourceMappingURL=index.d.ts.map

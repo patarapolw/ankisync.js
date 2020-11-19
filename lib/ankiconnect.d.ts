@@ -11,16 +11,36 @@ interface IModel extends IDefault {
         };
     };
 }
+interface IAddNote {
+    deckName: string;
+    modelName: string;
+    fields: Record<string, string>;
+    options?: {
+        allowDuplicate?: boolean;
+        duplicateScope?: string;
+        duplicateScopeOptions?: {
+            deckName?: string;
+            checkChildren?: boolean;
+        };
+    };
+    tags?: string[];
+    audio?: {
+        url: string;
+        filename: string;
+        skipHash?: string;
+        fields: string[];
+    }[];
+}
 interface INote extends IDefault {
     findNotes: {
         payload: {
             query: string;
         };
-        result: string[];
+        result: number[];
     };
     notesInfo: {
         payload: {
-            notes: string[];
+            notes: number[];
         };
         result: {
             fields: Record<string, {
@@ -31,13 +51,22 @@ interface INote extends IDefault {
     };
     addNote: {
         payload: {
-            note: {
-                deckName: string;
-                modelName: string;
-                fields: Record<string, string>;
-            };
+            note: IAddNote;
         };
-        result: string[];
+        result: number;
+    };
+    addNotes: {
+        payload: {
+            note: IAddNote[];
+        };
+        result: number[];
+    };
+    addTags: {
+        payload: {
+            notes: number[];
+            tags: string;
+        };
+        result: null;
     };
 }
 declare type IAnkiconnect = IModel & INote;

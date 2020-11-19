@@ -1,11 +1,13 @@
-import fs from 'fs-extra'
+// import fs from 'fs-extra'
 
 import { dbCards, dbDecks, dbNotes, initDatabase } from '../lib/anki21'
-import { getAnkiCollection } from '../lib/dir'
+import { ankiconnect } from '../lib/ankiconnect'
+// import { getAnkiCollection } from '../lib/dir'
 
 async function main() {
-  fs.copyFileSync(getAnkiCollection('User 1'), 'collection.anki2')
+  // fs.copyFileSync(getAnkiCollection('User 1'), 'collection.anki2')
   const db = initDatabase('collection.anki2')
+  // db.on('find-sql', console.log)
 
   const dMap = new Map<string, number[]>()
 
@@ -22,7 +24,7 @@ async function main() {
       }
     )(
       {
-        tags: { $like: '%zhlevel%' }
+        deck: { $like: 'ZhLevel%', $collate: 'binary' }
       },
       {
         deck: dbDecks.c.name,
@@ -32,11 +34,22 @@ async function main() {
     )
     .then((rs) =>
       rs.map((r) => {
-        dMap.set(r.deck, [...(dMap.get(r.deck) || []), r.nid])
+        const [type, level, ...tags] = r.deck.split('\x1f').reverse()
+        tags.push(`${type}_${level.replace(/ /g, '_')}`)
+        tags.pop()
+
+        tags.map((t) => {
+          dMap.set(t, [...(dMap.get(t) || []), r.nid])
+        })
       })
     )
 
-  console.log(dMap)
+  for (const [t, notes] of dMap) {
+    ankiconnect.invoke('addTags', {
+      notes,
+      tags: t
+    })
+  }
 
   await db.close()
 }
